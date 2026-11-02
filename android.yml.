@@ -1,0 +1,36 @@
+
+name: Build Highway Racing 3D APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Build Android APK
+        run: |
+          mkdir -p build
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            barichello/godot-ci:4.4.1 \
+            godot --headless --editor --path . --quit
+
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            barichello/godot-ci:4.4.1 \
+            godot --headless --path . --export-debug "Android" build/HighwayRacing3D.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Highway-Racing-3D-APK
+          path: build/HighwayRacing3D.apk.
